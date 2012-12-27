@@ -1,0 +1,62 @@
+body {
+    background: url(../img/background.png);
+}
+
+.container {
+    width:1100px
+}
+
+#page {
+    background: url(../img/top.png) no-repeat;
+    width: 100%;
+    min-height: 899px;
+}
+
+#altf4 {
+    position: absolute;
+    top:11px;
+    left:14px;
+    background: url(../img/an_altf4_product.png) no-repeat 0px -18px;
+    width:115px;
+    height: 18px;
+}
+
+#altf4:hover {
+    background: url(../img/an_altf4_product.png) no-repeat 0px 0px;
+    width:115px;
+    height: 18px;
+}
+
+li div.name {
+    left:5px;
+}
+
+li div.space {
+    float:right;
+    right:5px;
+}
+
+li div {
+    display:none;
+    position:relative;
+    color:#aaa;
+    background:#444;
+    padding:0 5px 0 5px;
+    top:-25px;
+}
+
+li:hover div {
+    display: inline;
+    text-align: none;
+}
+
+li:hover {
+    margin-bottom:0px;
+}
+
+.icon-test {
+    width:16px;
+    height:16px;
+    margin-top:0;
+    border-radius:2px;
+}
