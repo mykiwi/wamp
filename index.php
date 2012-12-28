@@ -536,14 +536,15 @@ foreach ($toolbox AS $name=>&$url)
 
 // main code server
 $conf = file_get_contents(WAMP_PATH.'wampmanager.conf');
-preg_match('#apacheVersion = "([0-9\.]+)"#', $conf, $match);
-$apache = $match[1];
+//preg_match('#apacheVersion = "([0-9\.]+)"#', $conf, $match);
+preg_match("([0-9\.]+)", apache_get_version(), $match);
+$apache = $match[0];
 
-preg_match('#phpVersion = "([0-9\.]+)"#', $conf, $match);
-$php = $match[1];
+//preg_match('#phpVersion = "([0-9\.]+)"#', $conf, $match);
+$php = phpversion();
 
-preg_match('#mysqlVersion = "([0-9\.]+)"#', $conf, $match);
-$mysql = $match[1];
+//preg_match('#mysqlVersion = "([0-9\.]+)"#', $conf, $match);
+$mysql = mysql_get_server_info();
 
 ?>
 <!DOCTYPE html>
