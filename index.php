@@ -39,16 +39,11 @@ $preview_inside_dir = array(
 
 
 
+$cache = array();
+// cache
+// end cache
 
-
-
-
-
-
-
-
-
-
+$cache['toolbox']['icon']['img'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAA3NCSVQICAjb4U/gAAABO1BMVEXu7u7n5+fk5OTi4uLg4ODd3d3X19fV1dXU1NTS0tLPz8+7z+/MzMy6zu65ze65zu7Kysq3zO62zO3IyMjHx8e1yOiyyO2yyOzFxcXExMSyxue0xuexxefDw8OtxeuwxOXCwsLBwcGuxOWsw+q/v7+qweqqwuqrwuq+vr6nv+qmv+m7u7ukvumkvemivOi5ubm4uLicuOebuOeat+e0tLSYtuabtuaatuaXteaZteaatN6Xs+aVs+WTsuaTsuWRsOSrq6uLreKoqKinp6elpaWLqNijo6OFpt2CpNyAo92BotyAo9+dnZ18oNqbm5t4nt57nth7ntp4nt15ndp3nd6ZmZmYmJhym956mtJzm96WlpaVlZVwmNyTk5Nvl9lultuSkpKNjY2Li4uKioqIiIiHh4eGhoZQgtVKfNFdha6iAAAAaXRSTlMA//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////914ivwAAAACXBIWXMAAAsSAAALEgHS3X78AAAAH3RFWHRTb2Z0d2FyZQBNYWNyb21lZGlhIEZpcmV3b3JrcyA4tWjSeAAAAKFJREFUGJVjYIABASc/PwYkIODDxBCNLODEzGiQgCwQxsTlzJCYmAgXiGKVdHFxYEuB8dkTOIS1tRUVocaIWiWI8IiIKKikaoD50kYWrpwmKSkpsRC+lBk3t2NEMgtMu4wpr5aeuHcAjC9vzadjYyjn7w7lK9kK6tqZK4d4wBQECenZW6pHesEdFC9mbK0W7otwsqenqmpMILIn4tIzgpG4ADUpGMOpkOiuAAAAAElFTkSuQmCC';
 
 
 
@@ -60,6 +55,11 @@ define('PATH_TO_DISPLAY',   $path_to_display);
 define('WAMP_PATH',         realpath($wamp_path).'\\');
 
 
+/**
+ * Clean array 
+ * @param array $array
+ * @return array
+ */
 function clearRoot($array)
 {
     foreach ($array AS &$item)
@@ -69,6 +69,12 @@ function clearRoot($array)
     return $array;
 }
 
+
+/**
+ * Clean alias array
+ * @param array $array 
+ * @return array
+ */
 function clearAlias($array)
 {
     $alias = array();
@@ -81,159 +87,41 @@ function clearAlias($array)
     return $alias;
 }
 
-function getDirectorySize($path)
-{
-    $totalsize  = 0;
-    $totalcount = 0;
-    $dircount   = 0;
 
-    if ($handle = opendir ($path))
-    {
-        while (false !== ($file = readdir($handle)))
-        {
-            $nextpath = $path . '/' . $file;
-            if ($file != '.' && $file != '..' && !is_link($nextpath))
-            {
-                if (is_dir($nextpath))
-                {
-                    $result = getDirectorySize($nextpath);
-                    $totalsize += $result;
-                }
-                elseif (is_file($nextpath))
-                    $totalsize += filesize($nextpath);
-            }
-        }
-    }
-    closedir ($handle);
-    
-    return $totalsize;
+/**
+ * Do a request and return the head and the body in an array
+ * @param string $url
+ * @return array [head, body]
+ */
+function getRequest($url)
+{
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 5);
+    $contents = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $body = substr($contents, $header_size);
+
+    $header = array();
+
+    $header['http_code']    = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    $header['content_type'] = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+
+    curl_close($curl);
+
+    return array('header' => $header, 'body' => $body);
 }
 
-function format_bytes($a_bytes)
-{
-    if ($a_bytes < 1024)
-        return $a_bytes .' o';
-    elseif ($a_bytes < 1048576)
-        return round($a_bytes / 1024) .' Ko';
-    elseif ($a_bytes < 1073741824)
-        return round($a_bytes / 1048576) . ' Mo';
-    elseif ($a_bytes < 1099511627776)
-        return round($a_bytes / 1073741824) . ' Go';
-    elseif ($a_bytes < 1125899906842624)
-        return round($a_bytes / 1099511627776) .' To';
-    elseif ($a_bytes < 1152921504606846976)
-        return round($a_bytes / 1125899906842624) .' Po';
-    elseif ($a_bytes < 1180591620717411303424)
-        return round($a_bytes / 1152921504606846976) .' Eo';
-    elseif ($a_bytes < 1208925819614629174706176)
-        return round($a_bytes / 1180591620717411303424) .' Zo';
-    else
-        return round($a_bytes / 1208925819614629174706176) .' Yo';
-}
 
-function getPreview($path)
-{
-    if ($thumbnails = glob(PATH_TO_DISPLAY.$path.'.*')) {
-        if (false !== getimagesize($thumbnails[0]))
-            return $thumbnails[0];
-    }
-
-    foreach ($GLOBALS['preview_inside_dir'] AS $preview)
-    {
-        if ($thumbnails = glob(PATH_TO_DISPLAY.$path.'/'.$preview.'*'))
-            if (false !== getimagesize($thumbnails[0]))
-                return $thumbnails[0];
-    }
-
-    if (!isset($GLOBALS['cache'][md5($path)]['dir']['img']))
-    {
-        $img = base64_encode(file_get_contents('http://fakeimg.pl/350x200/444/fff/?text='.urlencode($path)));
-        put_in_cache(array(md5($path) => array('dir' => array('img' => $img))));
-    }
-
-    return '?get_img='.md5($path).'&type=dir';
-}
-
-function getSizeFromCache($path)
-{
-    return format_bytes(getDirectorySize($path));
-}
-
-function getAliasUrl($path)
-{
-    $handle = @fopen($path, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
-            if (preg_match('#alias (.*) ".*"#i', $buffer, $match))
-            {
-                fclose($handle);
-                return ($match[1]);
-            }
-        }
-        fclose($handle);
-    }
-
-    return null;
-}
-
-function vhostIsEnable($httpd_conf)
-{
-    $return = true;
-
-    $handle = fopen($httpd_conf, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
-            $buffer = trim($buffer);
-            if (preg_match('#LoadModule vhost_alias_module modules/mod_vhost_alias.so#i', $buffer, $match))
-            {
-                if (substr($buffer, 0, 1) == '#')
-                    $return = false;
-            }
-            else if ($buffer == 'Include "'.WAMP_PATH.'vhost/*.conf"')
-                $GLOBALS['vhost_include_not_define'] = false;
-        }
-        fclose($handle);
-    }
-    return $return;
-}
-
-function generateCache($array, $cache = '', $base = '')
-{
-    if ($cache == '')
-        $base = '$cache';
-    else
-        $cache .= PHP_EOL;
-
-    foreach ($array AS $key=>$content)
-    {
-        if (!is_array($content))
-            $cache .= sprintf('%s[\'%s\'] = \'%s\';%s', $base, $key, $content, PHP_EOL);
-        else
-        {
-            $cache .= sprintf('%s[\'%s\'] = array();', $base, $key);
-            $new_base = sprintf('%s[\'%s\']', $base, $key);
-            $cache = generateCache($content, $cache, $new_base);
-        }
-    }
-
-    return $cache;
-}
-
-function put_in_cache($content)
-{
-    $file       = file_get_contents(__FILE__);
-    $file_begin = substr($file, 0, strpos($file, '//'.' end cache'));
-    $file_end   = substr($file, strpos($file, '//'.' end cache'));
-
-    $new_cache = generateCache($content);
-
-    file_put_contents(__FILE__, $file_begin.$new_cache.$file_end);
-}
-
+/**
+ * Find the favicon of an url and save it in cache
+ * @param string $path 
+ * @return string url
+ */
 function getFavicon($path)
 {
 
@@ -270,42 +158,41 @@ function getFavicon($path)
     return '?get_img='.md5($path.'/favicon.ico').'&type=icon';
 }
 
-function getVhostUrl($vhost)
+
+/**
+ * Get thumbnail for a directory inside www
+ * @param string $path 
+ * @return string url
+ */
+function getPreview($path)
 {
-    $handle = fopen($vhost, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
-            if (preg_match('#ServerName (.*)#i', $buffer, $match))
-            {
-                fclose($handle);
-                return 'http://'.$match[1].'/';
-            }
-        }
-        fclose($handle);
+    if ($thumbnails = glob(PATH_TO_DISPLAY.$path.'.*')) {
+        if (false !== getimagesize($thumbnails[0]))
+            return $thumbnails[0];
     }
-    return null;
+
+    foreach ($GLOBALS['preview_inside_dir'] AS $preview)
+    {
+        if ($thumbnails = glob(PATH_TO_DISPLAY.$path.'/'.$preview.'*'))
+            if (false !== getimagesize($thumbnails[0]))
+                return $thumbnails[0];
+    }
+
+    if (!isset($GLOBALS['cache'][md5($path)]['dir']['img']))
+    {
+        $img = base64_encode(file_get_contents('http://fakeimg.pl/350x200/444/fff/?text='.urlencode($path)));
+        put_in_cache(array(md5($path) => array('dir' => array('img' => $img))));
+    }
+
+    return '?get_img='.md5($path).'&type=dir';
 }
 
-function getVhostPath($vhost)
-{
-    $handle = fopen($vhost, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
-            if (preg_match('#DocumentRoot (.*)#i', $buffer, $match))
-            {
-                fclose($handle);
-                return $match[1];
-            }
-        }
-        fclose($handle);
-    }
-    return null;
-}
 
+/**
+ * Get thumbnail for the virtual host
+ * @param type $vhost 
+ * @return type
+ */
 function getVhostPreview($vhost)
 {
     if ($thumbnails = glob(substr($vhost['vhost'], 0, -5).'.*g')) { // png or jpg
@@ -330,41 +217,230 @@ function getVhostPreview($vhost)
     return '?get_img='.md5($vhost['url']).'&type=dir';
 }
 
+
 /**
- * file_get_content like but return also return the head request (if curl is enable)
- * @param string $url
- * @return array { [0] array head, [1] string content } 
+ * Get size of path
+ * @param string $path directory or file
+ * @return int         size in byte
  */
-function getRequest($url)
+function getDirectorySize($path)
 {
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($curl, CURLOPT_HEADER, 1);
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_TIMEOUT, 5);
-    $contents = curl_exec($curl);
+    $totalsize  = 0;
+    $totalcount = 0;
+    $dircount   = 0;
 
-    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-    $body = substr($contents, $header_size);
-
-    $header = array();
-
-    $header['http_code']    = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    $header['content_type'] = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
-
-    curl_close($curl);
-
-    return array('header' => $header, 'body' => $body);
+    if ($handle = opendir ($path))
+    {
+        while (false !== ($file = readdir($handle)))
+        {
+            $nextpath = $path . '/' . $file;
+            if ($file != '.' && $file != '..' && !is_link($nextpath))
+            {
+                if (is_dir($nextpath))
+                {
+                    $result = getDirectorySize($nextpath);
+                    $totalsize += $result;
+                }
+                else if (is_file($nextpath))
+                    $totalsize += filesize($nextpath);
+            }
+        }
+    }
+    closedir($handle);
+    
+    return $totalsize;
 }
 
 
-$cache = array();
+/**
+ * Convert size in small number
+ * @param int $a_bytes 
+ * @return string
+ */
+function format_bytes($a_bytes)
+{
+    if ($a_bytes < 1024)
+        return $a_bytes .' o';
+    elseif ($a_bytes < 1048576)
+        return round($a_bytes / 1024) .' Ko';
+    elseif ($a_bytes < 1073741824)
+        return round($a_bytes / 1048576) . ' Mo';
+    elseif ($a_bytes < 1099511627776)
+        return round($a_bytes / 1073741824) . ' Go';
+    elseif ($a_bytes < 1125899906842624)
+        return round($a_bytes / 1099511627776) .' To';
+    elseif ($a_bytes < 1152921504606846976)
+        return round($a_bytes / 1125899906842624) .' Po';
+    elseif ($a_bytes < 1180591620717411303424)
+        return round($a_bytes / 1152921504606846976) .' Eo';
+    elseif ($a_bytes < 1208925819614629174706176)
+        return round($a_bytes / 1180591620717411303424) .' Zo';
+    else
+        return round($a_bytes / 1208925819614629174706176) .' Yo';
+}
 
-// cache
-// end cache
 
-$cache['toolbox']['icon']['img'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAA3NCSVQICAjb4U/gAAABO1BMVEXu7u7n5+fk5OTi4uLg4ODd3d3X19fV1dXU1NTS0tLPz8+7z+/MzMy6zu65ze65zu7Kysq3zO62zO3IyMjHx8e1yOiyyO2yyOzFxcXExMSyxue0xuexxefDw8OtxeuwxOXCwsLBwcGuxOWsw+q/v7+qweqqwuqrwuq+vr6nv+qmv+m7u7ukvumkvemivOi5ubm4uLicuOebuOeat+e0tLSYtuabtuaatuaXteaZteaatN6Xs+aVs+WTsuaTsuWRsOSrq6uLreKoqKinp6elpaWLqNijo6OFpt2CpNyAo92BotyAo9+dnZ18oNqbm5t4nt57nth7ntp4nt15ndp3nd6ZmZmYmJhym956mtJzm96WlpaVlZVwmNyTk5Nvl9lultuSkpKNjY2Li4uKioqIiIiHh4eGhoZQgtVKfNFdha6iAAAAaXRSTlMA//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////914ivwAAAACXBIWXMAAAsSAAALEgHS3X78AAAAH3RFWHRTb2Z0d2FyZQBNYWNyb21lZGlhIEZpcmV3b3JrcyA4tWjSeAAAAKFJREFUGJVjYIABASc/PwYkIODDxBCNLODEzGiQgCwQxsTlzJCYmAgXiGKVdHFxYEuB8dkTOIS1tRUVocaIWiWI8IiIKKikaoD50kYWrpwmKSkpsRC+lBk3t2NEMgtMu4wpr5aeuHcAjC9vzadjYyjn7w7lK9kK6tqZK4d4wBQECenZW6pHesEdFC9mbK0W7otwsqenqmpMILIn4tIzgpG4ADUpGMOpkOiuAAAAAElFTkSuQmCC';
+/**
+ * Get size of path and convert it
+ * @param string $path 
+ * @return string
+ */
+function getSizeFromCache($path)
+{
+    return format_bytes(getDirectorySize($path));
+}
+
+
+
+/**
+ * Get the url of an alias from the conf file
+ * @param string $path 
+ * @return string url
+ */
+function getAliasUrl($path)
+{
+    $handle = @fopen($path, 'r');
+    if ($handle)
+    {
+        while (($buffer = fgets($handle)) !== false)
+        {
+            if (preg_match('#alias (.*) ".*"#i', $buffer, $match))
+            {
+                fclose($handle);
+                return ($match[1]);
+            }
+        }
+        fclose($handle);
+    }
+
+    return null;
+}
+
+
+/**
+ * Virtual host is enable in apache? and set the variable $vhost_include_not_define
+ * @param string $httpd_conf path of httpd.conf
+ * @return bool
+ */
+function vhostIsEnable($httpd_conf)
+{
+    $return = true;
+
+    $handle = fopen($httpd_conf, 'r');
+    if ($handle)
+    {
+        while (($buffer = fgets($handle)) !== false)
+        {
+            $buffer = trim($buffer);
+            if (preg_match('#LoadModule vhost_alias_module modules/mod_vhost_alias.so#i', $buffer, $match))
+            {
+                if (substr($buffer, 0, 1) == '#')
+                    $return = false;
+            }
+            else if ($buffer == 'Include "'.WAMP_PATH.'vhost\*.conf"')
+                $GLOBALS['vhost_include_not_define'] = false;
+        }
+        fclose($handle);
+    }
+    return $return;
+}
+
+
+/**
+ * Parse vhost conf and return the url
+ * @param string $vhost path 
+ * @return string url
+ */
+function getVhostUrl($vhost)
+{
+    $handle = fopen($vhost, 'r');
+    if ($handle)
+    {
+        while (($buffer = fgets($handle)) !== false)
+        {
+            if (preg_match('#ServerName (.*)#i', $buffer, $match))
+            {
+                fclose($handle);
+
+                return 'http://'.$match[1].'/';
+            }
+        }
+        fclose($handle);
+    }
+
+    return null;
+}
+
+
+/**
+ * Generate the string cache
+ * @param array   $array 
+ * @param string  $cache 
+ * @param string  $base  
+ * @return string
+ */
+function generateCache($array, $cache = '', $base = '')
+{
+    if ($cache == '')
+        $base = '$cache';
+    else
+        $cache .= PHP_EOL;
+
+    foreach ($array AS $key=>$content)
+    {
+        if (!is_array($content))
+            $cache .= sprintf('%s[\'%s\'] = \'%s\';%s', $base, $key, $content, PHP_EOL);
+        else
+        {
+            $cache   .= sprintf('%s[\'%s\'] = array();', $base, $key);
+            $new_base = sprintf('%s[\'%s\']', $base, $key);
+            $cache    = generateCache($content, $cache, $new_base);
+        }
+    }
+
+    return $cache;
+}
+
+
+/**
+ * Overwrite this file and add the cache
+ * @param array $content to put in cache
+ */
+function put_in_cache($content)
+{
+    $file       = file_get_contents(__FILE__);
+    $file_begin = substr($file, 0, strpos($file, '//'.' end cache'));
+    $file_end   = substr($file, strpos($file, '//'.' end cache'));
+
+    $new_cache = generateCache($content);
+
+    file_put_contents(__FILE__, $file_begin.$new_cache.$file_end);
+}
+
+
+/**
+ * Get document root of a virtual host
+ * @param string $vhost path 
+ * @return string root
+ */
+function getVhostPath($vhost)
+{
+    $handle = fopen($vhost, 'r');
+    if ($handle)
+    {
+        while (($buffer = fgets($handle)) !== false)
+        {
+            if (preg_match('#DocumentRoot (.*)#i', $buffer, $match))
+            {
+                fclose($handle);
+                return $match[1];
+            }
+        }
+        fclose($handle);
+    }
+    return null;
+}
+
 
 
 
@@ -391,8 +467,6 @@ if (isset($_GET['get_size']))
 
 if (isset($_GET['phpinfo']))
     die(phpinfo());
-
-
 // end page get
 
 
@@ -436,7 +510,6 @@ if (($apache_conf = glob(WAMP_PATH.'bin/apache/apache*/conf/httpd.conf')) > 0)
 }
 
 
-
 // main code alias
 $alias = clearAlias(glob(WAMP_PATH.'alias/*.conf'));
 foreach ($alias AS $name=>&$path)
@@ -460,6 +533,7 @@ foreach ($toolbox AS $name=>&$url)
     $url = $structure;
 }
 
+
 // main code server
 $conf = file_get_contents(WAMP_PATH.'wampmanager.conf');
 preg_match('#apacheVersion = "([0-9\.]+)"#', $conf, $match);
@@ -476,9 +550,7 @@ $mysql = $match[1];
 <html>
     <head>
         <title>localhost</title>
-        <!-- Bootstrap -->
         <link href=".bootstrap/css/bootstrap.min.css" rel="stylesheet">
-        <!-- Project -->
         <link href=".bootstrap/css/application.css" rel="stylesheet">
     </head>
     <body>
@@ -523,7 +595,6 @@ $mysql = $match[1];
                                 </ul>
                                 <?php
                             }
-
 
                             // Example
                             $vhost_default_conf = "&lt;VirtualHost *:80>\n\tServerName <strong style='color:#D14'>PROJECT</strong>.localhost.com\n\tServerAlias <strong style='color:#D14'>PROJECT</strong>.localhost\n\n\tDocumentRoot ".strtolower(WAMP_PATH)."www_<strong style='color:#D14'>PROJECT</strong>\n\t&lt;directory ".strtolower(WAMP_PATH)."www_<strong style='color:#D14'>PROJECT</strong>>\n\t\tallow from all\n\t&lt;/directory>\n\n\tErrorLog ".strtolower(WAMP_PATH)."logs\<strong style='color:#D14'>PROJECT</strong>_apache_error.log\n&lt;/VirtualHost>";

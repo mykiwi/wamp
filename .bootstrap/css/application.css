@@ -29,6 +29,7 @@ body {
 
 li div.name {
     left:5px;
+    float:left;
 }
 
 li div.space {
