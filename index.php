@@ -460,10 +460,7 @@ if (isset($_GET['get_external_img']))
 }
 
 if (isset($_GET['get_size']))
-{
-    echo @getSizeFromCache($_GET['get_size']);
-    die();
-}
+    die(@getSizeFromCache($_GET['get_size']));
 
 if (isset($_GET['phpinfo']))
     die(phpinfo());
@@ -535,16 +532,13 @@ foreach ($toolbox AS $name=>&$url)
 
 
 // main code server
-$conf = file_get_contents(WAMP_PATH.'wampmanager.conf');
-//preg_match('#apacheVersion = "([0-9\.]+)"#', $conf, $match);
 preg_match("([0-9\.]+)", apache_get_version(), $match);
-$apache = $match[0];
+$apache_version = $match[0];
 
-//preg_match('#phpVersion = "([0-9\.]+)"#', $conf, $match);
-$php = phpversion();
+$php_version = phpversion();
 
-//preg_match('#mysqlVersion = "([0-9\.]+)"#', $conf, $match);
-$mysql = mysql_get_server_info();
+preg_match("([0-9\.]+)", mysql_get_server_info(), $match);
+$mysql_version = $match[0];
 
 ?>
 <!DOCTYPE html>
@@ -615,14 +609,14 @@ $mysql = mysql_get_server_info();
                         <span class="label label-info" style="margin-top:11px;margin-bottom:10px">server</span>
                         <div class="row-fluid" style="padding-left:20px">
                             <div class="span2">
-                                <span class="label">Apache</span> <span class="label label-warning"><?php echo $apache; ?></span><br/>
-                                <span class="label">PHP</span> <span class="label label-warning"><?php echo $php; ?></span><br/>
-                                <span class="label">MySQL</span> <span class="label label-warning"><?php echo $mysql; ?></span>
+                                <span class="label">Apache</span> <span class="label label-warning"><?php echo $apache_version; ?></span><br/>
+                                <span class="label">PHP</span>    <span class="label label-warning"><?php echo $php_version;    ?></span><br/>
+                                <span class="label">MySQL</span>  <span class="label label-warning"><?php echo $mysql_version;  ?></span>
                             </div>
                             <div class="span10" style="margin-left:-20px">
                                 <span class="label label-inverse">PHP extensions</span>
                                 <?php foreach (get_loaded_extensions() AS $extension): ?>
-                                <span class="label"><?php echo $extension; ?></span> 
+                                    <span class="label"><?php echo $extension; ?></span> 
                                 <?php endforeach; ?>
                             </div>
                         </div>
