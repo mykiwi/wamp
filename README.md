@@ -37,14 +37,14 @@ $preview_inside_dir = array(
 You have 2 ways to customize the thumbnail:
 
 1. Put the image in /www with the same name of the directory<br>
-2. Put the image inside the directory, with a name like in ```$preview_inside_thumbnails```<br>
+2. Put the image inside the directory, with a name like in ```$preview_inside_dir```<br>
 
 ### virtual host
 
 You have 2 ways to customize the thumbnail:
 
 1. Put the image next to the virtual host conf, with the same name<br>
-2. Put the image inside the directory, with a name like in ```$preview_inside_thumbnails```<br>
+2. Put the image inside the directory, with a name like in ```$preview_inside_dir```<br>
 
 
 ## Special Thanks
