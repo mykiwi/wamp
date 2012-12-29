@@ -1,24 +1,53 @@
-Homepage WAMP
-=============
+# [Personal Homepage WAMP](https://github.com/MyKiwi/wamp)
 
-## Preview
-![](http://i.imgur.com/4YPFi.png)
+![Personal Homepage WAMP](http://www.werox.fr/image/preview/1617x1036/139.png)
 
+## Features:
 
-##Thumbnail personalized
+  * Display www directories
+  * Display virtual host
+  * Custom thumbnails
+  * Example for create a new virtual host
+  * Alias with favicon stored in cache
+  * Toolbox with favicon stored in cache
 
-```www:
-/project
+## Quick Start
 
-/project.png
-or /project/screenshot.png
-or /project/preview.png
+You can configure and customize the script with this variables:
+```php
+<?php
+$path_to_display = './';
+$wamp_path       = 'C:/wamp';
+
+$toolbox = array(
+    'Name' => 'http://url.to.go',
+);
+
+// custom thumbnails to search
+$preview_inside_dir = array(
+    'screenshot',
+    'preview',
+);
 ```
 
-```vhost:
-c:/wamp/vhost/project.conf
-c:/wamp/vhost/project.png
+## Custom Thumbnails
 
-or /inside_project/screenshot.png
-or /inside_project/preview.png
-```
+### www
+
+You have 2 ways to customize the thumbnail:
+
+1. Put the image in /www with the same name of the directory<br>
+2. Put the image inside the directory, with a name like in ```$preview_inside_dir```<br>
+
+### virtual host
+
+You have 2 ways to customize the thumbnail:
+
+1. Put the image next to the virtual host conf, with the same name<br>
+2. Put the image inside the directory, with a name like in ```$preview_inside_dir```<br>
+
+
+## Special Thanks
+ * [Twitter Bootstrap](http://twitter.github.com/bootstrap/)
+ * [Fake images please?](http://fakeimg.pl/)
+
