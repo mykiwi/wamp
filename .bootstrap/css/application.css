@@ -61,3 +61,12 @@ li:hover {
     margin-top:0;
     border-radius:2px;
 }
+
+pre {
+    cursor: default;
+}
+
+.project {
+    color:#D14;
+    cursor:text;
+}

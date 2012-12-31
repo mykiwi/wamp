@@ -613,7 +613,7 @@ $mysql_version = $match[0];
                             }
 
                             // Example
-                            $vhost_default_conf = "&lt;VirtualHost *:80>\n\tServerName <strong style='color:#D14'>PROJECT</strong>.localhost.com\n\tServerAlias <strong style='color:#D14'>PROJECT</strong>.localhost\n\n\tDocumentRoot ".strtolower(WAMP_PATH)."www_<strong style='color:#D14'>PROJECT</strong>\n\t&lt;directory ".strtolower(WAMP_PATH)."www_<strong style='color:#D14'>PROJECT</strong>>\n\t\tallow from all\n\t&lt;/directory>\n\n\tErrorLog ".strtolower(WAMP_PATH)."logs\<strong style='color:#D14'>PROJECT</strong>_apache_error.log\n&lt;/VirtualHost>";
+                            $vhost_default_conf = "&lt;VirtualHost *:80>\n\tServerName <strong class='project'>PROJECT</strong>.localhost.com\n\tServerAlias <strong class='project'>PROJECT</strong>.localhost\n\n\tDocumentRoot ".strtolower(WAMP_PATH)."www_<strong class='project'>PROJECT</strong>\n\t&lt;directory ".strtolower(WAMP_PATH)."www_<strong class='project'>PROJECT</strong>>\n\t\tallow from all\n\t&lt;/directory>\n\n\tErrorLog ".strtolower(WAMP_PATH)."logs\<strong class='project'>PROJECT</strong>_apache_error.log\n&lt;/VirtualHost>";
                             ?>
                             <span id="vhost-example-button" class="label label-warning" style="cursor:help;float:right">Example vhost</span>
                             <div id="vhost-example" style="<?php if ($vhostIsEnable): ?>display:none<?php endif; ?>">
@@ -621,8 +621,8 @@ $mysql_version = $match[0];
                                 <?php if ($vhost_include_not_define): ?>
                                     <small>Add <code>Include "<?php echo WAMP_PATH; ?>vhost\*.conf"</code> in <code><?php echo sprintf('%s<strong>%s</strong>', substr($apache_conf, 0, -10), substr($apache_conf, -10)); ?></code></small><br/>
                                 <?php endif; ?>
-                                <small>You must write this conf inside <code><?php echo WAMP_PATH ?>vhost\<strong>PROJECT</strong>.conf</code> and create a directory <code><?php echo WAMP_PATH ?>www_<strong>PROJECT</strong></code></small><br/>
-                                <small>Don't forget to add your domains in <code>C:\Windows\System32\drivers\etc\hosts</code> like <code>127.0.0.1 <strong>PROJECT</strong>.localhost.com <strong>PROJECT</strong>.localhost</code>
+                                <small>You must write this conf inside <code><?php echo WAMP_PATH ?>vhost\<strong class="project">PROJECT</strong>.conf</code> and create a directory <code><?php echo WAMP_PATH ?>www_<strong class='project'>PROJECT</strong></code></small><br/>
+                                <small>Don't forget to add your domains in <code>C:\Windows\System32\drivers\etc\hosts</code> like <code>127.0.0.1 <strong class='project'>PROJECT</strong>.localhost.com <strong class='project'>PROJECT</strong>.localhost</code>
                             </div>
                         </div>
 
