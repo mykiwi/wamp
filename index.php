@@ -650,7 +650,7 @@ $mysql_version = $match[0];
                         <div class="row-fluid" style="padding-left:5px">
                             <?php
                             foreach ($alias AS $item)
-                                echo sprintf('<a href="%s"><i class="icon-test" style="background:url(%s);"></i> %s</a><br/>', $item['url'], $item['img'], $item['name']);
+                                echo sprintf('<a href="%s"><i class="icon-test" style="background:url(%s);background-size:16px 16px"></i> %s</a><br/>', $item['url'], $item['img'], $item['name']);
                             ?>
                         </div>
 
@@ -659,7 +659,7 @@ $mysql_version = $match[0];
                         <div class="row-fluid" style="padding-left:5px">
                             <?php
                             foreach ($toolbox AS $item)
-                                echo sprintf('<a href="%s" target="_blank"><i class="icon-test" style="background:url(%s);"></i> %s</a><br/>', $item['url'], $item['img'], $item['name']);
+                                echo sprintf('<a href="%s" target="_blank"><i class="icon-test" style="background:url(%s);background-size:16px 16px"></i> %s</a><br/>', $item['url'], $item['img'], $item['name']);
                             ?>
                         </div>
 
