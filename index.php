@@ -167,7 +167,7 @@ function getFavicon($path)
                 }
                 else if ($request['header']['http_code'] == 302)
                 {
-                    var_dump($request);
+                    //var_dump($request);
                 }
             }
             put_in_cache(array(md5($path.'/favicon.ico') => array('icon' => array('img' => ''))));
@@ -247,8 +247,6 @@ function getVhostPreview($vhost)
 function getDirectorySize($path)
 {
     $totalsize  = 0;
-    $totalcount = 0;
-    $dircount   = 0;
 
     if ($handle = opendir ($path))
     {
@@ -471,20 +469,26 @@ if (isset($_GET['get_img']) && isset($_GET['type']))
     header("Content-type: image/png");
     if (!isset($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img']))
         die(base64_decode($GLOBALS['cache']['toolbox']['icon']['img']));
-    die(base64_decode($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img']));
+    echo base64_decode($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img']);
+    return ;
 }
 
 if (isset($_GET['get_external_img']))
 {
     header("Content-type: image/png");
-    die(file_get_contents($_GET['get_external_img']));
+    echo file_get_contents($_GET['get_external_img']);
+    return ;
 }
 
-if (isset($_GET['get_size']))
-    die(@getSizeFromCache($_GET['get_size']));
+if (isset($_GET['get_size'])) {
+    echo @getSizeFromCache($_GET['get_size']);
+    return ;
+}
 
-if (isset($_GET['phpinfo']))
-    die(phpinfo());
+if (isset($_GET['phpinfo'])) {
+    phpinfo();
+    return ;
+}
 // end page get
 
 
