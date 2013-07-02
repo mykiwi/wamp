@@ -467,8 +467,10 @@ function getVhostPath($vhost)
 if (isset($_GET['get_img']) && isset($_GET['type']))
 {
     header("Content-type: image/png");
-    if (!isset($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img']))
-        die(base64_decode($GLOBALS['cache']['toolbox']['icon']['img']));
+    if (!isset($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img'])) {
+        echo ase64_decode($GLOBALS['cache']['toolbox']['icon']['img']);
+        return ;
+    }
     echo base64_decode($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img']);
     return ;
 }
