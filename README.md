@@ -1,6 +1,6 @@
 # [Personal Homepage WAMP](https://github.com/MyKiwi/wamp)
 
-![Personal Homepage WAMP](http://www.werox.fr/image/preview/1617x1036/139.png)
+![Personal Homepage WAMP](http://i.imgur.com/7NpttKN.jpg)
 
 ## Features:
 
