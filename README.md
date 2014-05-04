@@ -1,4 +1,4 @@
-# [Personal Homepage WAMP](https://github.com/MyKiwi/wamp)
+# [Personal Homepage WAMP](https://github.com/romqin/wamp)
 
 ![Personal Homepage WAMP](http://i.imgur.com/7NpttKN.jpg)
 
