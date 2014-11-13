@@ -8,10 +8,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,8 +21,8 @@
  * SOFTWARE.
  */
 
-// Page created by MyKiwi [Romain Gautier] <mail@romain.sh>
-// http://github.com/mykiwi/wamp
+// Page created by Romqin [Romain Gautier] <mail@romain.sh>
+// http://github.com/romqin/wamp
 
 
 // TODO
@@ -34,8 +34,11 @@
 
 $path_to_display = './';
 $wamp_path       = 'C:/wamp';
-$projectsListIgnore = array ('.', '..');
 
+$ingore_path = array(
+    '.',
+    '..',
+);
 
 $toolbox = array(
     'Regex tester'           => 'http://regex101.com/',
@@ -78,34 +81,34 @@ define('WAMP_PATH',         realpath($wamp_path).'\\');
 
 
 /**
- * Clean array 
- * @param array $array
- * @param array $lirst
+ * Clean array
+ * @param  array $array
+ * @param  array $lirst
  * @return array
  */
 function clearRoot($array, $list)
 {
-    foreach ($array AS $k => &$item){
+    foreach ($array as $k => &$item) {
         $item = substr($item, strlen(PATH_TO_DISPLAY), -1);
-        if(in_array($item, $list)){
+        if (in_array($item, $list)) {
             unset($array[$k]);
         }
     }
     sort($array, SORT_FLAG_CASE | SORT_STRING);
+
     return $array;
 }
 
 
 /**
  * Clean alias array
- * @param array $array 
+ * @param  array $array
  * @return array
  */
 function clearAlias($array)
 {
     $alias = array();
-    foreach ($array AS &$item)
-    {
+    foreach ($array as &$item) {
         $file = explode('/', $item);
         $alias[substr($file[count($file) - 1], 0, -1 * strlen('.conf'))] = $item;
     }
@@ -116,8 +119,8 @@ function clearAlias($array)
 
 /**
  * Do a request and return the head and the body in an array
- * @param string $url
- * @return array [head, body]
+ * @param  string $url
+ * @return array       [head, body]
  */
 function getRequest($url)
 {
@@ -139,73 +142,72 @@ function getRequest($url)
 
     curl_close($curl);
 
-    return array('header' => $header, 'body' => $body);
+    return array(
+        'header' => $header,
+        'body'   => $body,
+    );
 }
 
 
 /**
  * Find the favicon of an url and save it in cache
- * @param string $path 
- * @return string url
+ * @param  string $path
+ * @return string       url
  */
 function getFavicon($path)
 {
-
-    if (!isset($GLOBALS['cache'][md5($path.'/favicon.ico')]['icon']['img']))
-    {
+    if (!isset($GLOBALS['cache'][md5($path.'/favicon.ico')]['icon']['img'])) {
         $request = getRequest($path.'/favicon.ico');
-        if ($request['header']['http_code'] == 200 && substr($request['header']['content_type'], 0, 6) == 'image/')
-        {
+        if ($request['header']['http_code'] == 200 && substr($request['header']['content_type'], 0, 6) == 'image/') {
             put_in_cache(array(md5($path.'/favicon.ico') => array('icon' => array('img' => base64_encode($request['body'])))));
+
             return '?get_img='.md5($path.'/favicon.ico').'&type=icon';
-        }
-        else
-        {
+        } else {
             $url = explode('/', $path);
-            if ($url[2] != 'localhost')
-            {
+            if ($url[2] != 'localhost') {
                 $request = getRequest('http://'.$url[2].'/favicon.ico');
-                if ($request['header']['http_code'] == 200 && substr($request['header']['content_type'], 0, 6) == 'image/')
-                {
+                if ($request['header']['http_code'] == 200 && substr($request['header']['content_type'], 0, 6) == 'image/') {
                     put_in_cache(array(md5($path.'/favicon.ico') => array('icon' => array('img' => base64_encode($request['body'])))));
+
                     return '?get_img='.md5($path.'/favicon.ico').'&type=icon';
-                }
-                else if ($request['header']['http_code'] == 302)
-                {
+                } elseif ($request['header']['http_code'] == 302) {
                     //var_dump($request);
                 }
             }
             put_in_cache(array(md5($path.'/favicon.ico') => array('icon' => array('img' => ''))));
+
             return '?get_img=toolbox&type=icon';
         }
-    }
-    else if ('' == $GLOBALS['cache'][md5($path.'/favicon.ico')]['icon']['img'])
+    } elseif ('' == $GLOBALS['cache'][md5($path.'/favicon.ico')]['icon']['img']) {
         return '?get_img=toolbox&type=icon';
+    }
+
     return '?get_img='.md5($path.'/favicon.ico').'&type=icon';
 }
 
 
 /**
  * Get thumbnail for a directory inside www
- * @param string $path 
- * @return string url
+ * @param  string $path
+ * @return string       url
  */
 function getPreview($path)
 {
     if ($thumbnails = glob(PATH_TO_DISPLAY.$path.'.*')) {
-        if (false !== getimagesize($thumbnails[0]))
+        if (false !== getimagesize($thumbnails[0])) {
             return $thumbnails[0];
+        }
     }
 
-    foreach ($GLOBALS['preview_inside_dir'] AS $preview)
-    {
-        if ($thumbnails = glob(PATH_TO_DISPLAY.$path.'/'.$preview.'*'))
-            if (false !== getimagesize($thumbnails[0]))
+    foreach ($GLOBALS['preview_inside_dir'] as $preview) {
+        if ($thumbnails = glob(PATH_TO_DISPLAY.$path.'/'.$preview.'*')) {
+            if (false !== getimagesize($thumbnails[0])) {
                 return $thumbnails[0];
+            }
+        }
     }
 
-    if (!isset($GLOBALS['cache'][md5($path)]['dir']['img']))
-    {
+    if (!isset($GLOBALS['cache'][md5($path)]['dir']['img'])) {
         $img = base64_encode(file_get_contents('http://fakeimg.pl/350x200/444/fff/?text='.urlencode($path)));
         put_in_cache(array(md5($path) => array('dir' => array('img' => $img))));
     }
@@ -216,26 +218,28 @@ function getPreview($path)
 
 /**
  * Get thumbnail for the virtual host
- * @param type $vhost 
+ * @param  type $vhost
  * @return type
  */
 function getVhostPreview($vhost)
 {
     if ($thumbnails = glob(substr($vhost['vhost'], 0, -5).'.*g')) { // png or jpg
-        foreach ($thumbnails AS $thumbnail)
-            if (false !== getimagesize($thumbnail))
+        foreach ($thumbnails as $thumbnail) {
+            if (false !== getimagesize($thumbnail)) {
                 return '?get_external_img='.realpath($thumbnail);
+            }
+        }
     }
 
-    foreach ($GLOBALS['preview_inside_dir'] AS $preview)
-    {
-        if ($thumbnails = glob($vhost['path'].'/'.$preview.'*'))
-            if (false !== getimagesize($thumbnails[0]))
+    foreach ($GLOBALS['preview_inside_dir'] as $preview) {
+        if ($thumbnails = glob($vhost['path'].'/'.$preview.'*')) {
+            if (false !== getimagesize($thumbnails[0])) {
                 return $vhost['url'].'/'.$thumbnails[0];
+            }
+        }
     }
 
-    if (!isset($GLOBALS['cache'][md5($vhost['url'])]['dir']['img']))
-    {
+    if (!isset($GLOBALS['cache'][md5($vhost['url'])]['dir']['img'])) {
         $img = base64_encode(file_get_contents('http://fakeimg.pl/350x200/444/fff/?text='.urlencode($vhost['name'])));
         put_in_cache(array(md5($vhost['url']) => array('dir' => array('img' => $img))));
     }
@@ -246,67 +250,64 @@ function getVhostPreview($vhost)
 
 /**
  * Get size of path
- * @param string $path directory or file
- * @return int         size in byte
+ * @param  string $path directory or file
+ * @return int          size in byte
  */
 function getDirectorySize($path)
 {
     $totalsize  = 0;
 
-    if ($handle = opendir ($path))
-    {
-        while (false !== ($file = readdir($handle)))
-        {
-            $nextpath = $path . '/' . $file;
-            if ($file != '.' && $file != '..' && !is_link($nextpath))
-            {
-                if (is_dir($nextpath))
-                {
+    if ($handle = opendir($path)) {
+        while (false !== ($file = readdir($handle))) {
+            $nextpath = $path.'/'.$file;
+            if ($file != '.' && $file != '..' && !is_link($nextpath)) {
+                if (is_dir($nextpath)) {
                     $result = getDirectorySize($nextpath);
                     $totalsize += $result;
-                }
-                else if (is_file($nextpath))
+                } elseif (is_file($nextpath)) {
                     $totalsize += filesize($nextpath);
+                }
             }
         }
     }
     closedir($handle);
-    
+
     return $totalsize;
 }
 
 
 /**
  * Convert size in small number
- * @param int $a_bytes 
+ * @param  int    $a_bytes
  * @return string
  */
 function format_bytes($a_bytes)
 {
-    if ($a_bytes < 1024)
-        return $a_bytes .' o';
-    elseif ($a_bytes < 1048576)
-        return round($a_bytes / 1024) .' Ko';
-    elseif ($a_bytes < 1073741824)
-        return round($a_bytes / 1048576) . ' Mo';
-    elseif ($a_bytes < 1099511627776)
-        return round($a_bytes / 1073741824) . ' Go';
-    elseif ($a_bytes < 1125899906842624)
-        return round($a_bytes / 1099511627776) .' To';
-    elseif ($a_bytes < 1152921504606846976)
-        return round($a_bytes / 1125899906842624) .' Po';
-    elseif ($a_bytes < 1180591620717411303424)
-        return round($a_bytes / 1152921504606846976) .' Eo';
-    elseif ($a_bytes < 1208925819614629174706176)
-        return round($a_bytes / 1180591620717411303424) .' Zo';
-    else
-        return round($a_bytes / 1208925819614629174706176) .' Yo';
+    if ($a_bytes < 1024) {
+        return $a_bytes.' o';
+    } elseif ($a_bytes < 1048576) {
+        return round($a_bytes / 1024).' Ko';
+    } elseif ($a_bytes < 1073741824) {
+        return round($a_bytes / 1048576).' Mo';
+    } elseif ($a_bytes < 1099511627776) {
+        return round($a_bytes / 1073741824).' Go';
+    } elseif ($a_bytes < 1125899906842624) {
+        return round($a_bytes / 1099511627776).' To';
+    } elseif ($a_bytes < 1152921504606846976) {
+        return round($a_bytes / 1125899906842624).' Po';
+    } elseif ($a_bytes < 1180591620717411303424) {
+        return round($a_bytes / 1152921504606846976).' Eo';
+    } elseif ($a_bytes < 1208925819614629174706176) {
+        return round($a_bytes / 1180591620717411303424).' Zo';
+    } else {
+        return round($a_bytes / 1208925819614629174706176).' Yo';
+    }
 }
 
 
 /**
  * Get size of path and convert it
- * @param string $path 
+ * @param  string $path
  * @return string
  */
 function getSizeFromCache($path)
@@ -315,22 +316,19 @@ function getSizeFromCache($path)
 }
 
 
-
 /**
  * Get the url of an alias from the conf file
- * @param string $path 
- * @return string url
+ * @param  string $path
+ * @return string       url
  */
 function getAliasUrl($path)
 {
     $handle = @fopen($path, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
-            if (preg_match('#alias (.*) ".*"#i', $buffer, $match))
-            {
+    if ($handle) {
+        while (($buffer = fgets($handle)) !== false) {
+            if (preg_match('#alias (.*) ".*"#i', $buffer, $match)) {
                 fclose($handle);
+
                 return ($match[1]);
             }
         }
@@ -343,7 +341,7 @@ function getAliasUrl($path)
 
 /**
  * Virtual host is enable in apache? and set the variable $vhost_include_not_define
- * @param string $httpd_conf path of httpd.conf
+ * @param  string $httpd_conf path of httpd.conf
  * @return bool
  */
 function vhostIsEnable($httpd_conf)
@@ -351,39 +349,35 @@ function vhostIsEnable($httpd_conf)
     $return = true;
 
     $handle = fopen($httpd_conf, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
+    if ($handle) {
+        while (($buffer = fgets($handle)) !== false) {
             $buffer = trim($buffer);
-            if (preg_match('#LoadModule vhost_alias_module modules/mod_vhost_alias.so#i', $buffer, $match))
-            {
-                if (substr($buffer, 0, 1) == '#')
+            if (preg_match('#LoadModule vhost_alias_module modules/mod_vhost_alias.so#i', $buffer, $match)) {
+                if (substr($buffer, 0, 1) == '#') {
                     $return = false;
-            }
-            else if ($buffer == 'Include "'.WAMP_PATH.'vhost\*.conf"')
+                }
+            } elseif ($buffer == 'Include "'.WAMP_PATH.'vhost\*.conf"') {
                 $GLOBALS['vhost_include_not_define'] = false;
+            }
         }
         fclose($handle);
     }
+
     return $return;
 }
 
 
 /**
  * Parse vhost conf and return the url
- * @param string $vhost path 
- * @return string url
+ * @param  string $vhost path
+ * @return string        url
  */
 function getVhostUrl($vhost)
 {
     $handle = fopen($vhost, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
-            if (preg_match('#ServerName (.*)#i', $buffer, $match))
-            {
+    if ($handle) {
+        while (($buffer = fgets($handle)) !== false) {
+            if (preg_match('#ServerName (.*)#i', $buffer, $match)) {
                 fclose($handle);
 
                 return 'http://'.$match[1].'/';
@@ -398,24 +392,23 @@ function getVhostUrl($vhost)
 
 /**
  * Generate the string cache
- * @param array   $array 
- * @param string  $cache 
- * @param string  $base  
+ * @param  array  $array
+ * @param  string $cache
+ * @param  string $base
  * @return string
  */
 function generateCache($array, $cache = '', $base = '')
 {
-    if ($cache == '')
+    if ($cache == '') {
         $base = '$cache';
-    else
+    } else {
         $cache .= PHP_EOL;
+    }
 
-    foreach ($array AS $key=>$content)
-    {
-        if (!is_array($content))
+    foreach ($array as $key => $content) {
+        if (!is_array($content)) {
             $cache .= sprintf('%s[\'%s\'] = \'%s\';%s', $base, $key, $content, PHP_EOL);
-        else
-        {
+        } else {
             $cache   .= sprintf('%s[\'%s\'] = array();', $base, $key);
             $new_base = sprintf('%s[\'%s\']', $base, $key);
             $cache    = generateCache($content, $cache, $new_base);
@@ -444,24 +437,23 @@ function put_in_cache($content)
 
 /**
  * Get document root of a virtual host
- * @param string $vhost path 
- * @return string root
+ * @param  string $vhost path
+ * @return string        root
  */
 function getVhostPath($vhost)
 {
     $handle = fopen($vhost, 'r');
-    if ($handle)
-    {
-        while (($buffer = fgets($handle)) !== false)
-        {
-            if (preg_match('#DocumentRoot (.*)#i', $buffer, $match))
-            {
+    if ($handle) {
+        while (($buffer = fgets($handle)) !== false) {
+            if (preg_match('#DocumentRoot (.*)#i', $buffer, $match)) {
                 fclose($handle);
+
                 return $match[1];
             }
         }
         fclose($handle);
     }
+
     return null;
 }
 
@@ -469,32 +461,35 @@ function getVhostPath($vhost)
 
 
 // page get
-if (isset($_GET['get_img']) && isset($_GET['type']))
-{
+if (isset($_GET['get_img']) && isset($_GET['type'])) {
     header("Content-type: image/png");
     if (!isset($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img'])) {
         echo ase64_decode($GLOBALS['cache']['toolbox']['icon']['img']);
-        return ;
+
+        return;
     }
     echo base64_decode($GLOBALS['cache'][$_GET['get_img']][$_GET['type']]['img']);
-    return ;
+
+    return;
 }
 
-if (isset($_GET['get_external_img']))
-{
+if (isset($_GET['get_external_img'])) {
     header("Content-type: image/png");
     echo file_get_contents($_GET['get_external_img']);
-    return ;
+
+    return;
 }
 
 if (isset($_GET['get_size'])) {
     echo @getSizeFromCache($_GET['get_size']);
-    return ;
+
+    return;
 }
 
 if (isset($_GET['phpinfo'])) {
     phpinfo();
-    return ;
+
+    return;
 }
 // end page get
 
@@ -502,9 +497,8 @@ if (isset($_GET['phpinfo'])) {
 
 
 // main code www
-$root = clearRoot(glob(PATH_TO_DISPLAY.'*/'), $projectsListIgnore);
-foreach ($root AS &$path)
-{
+$root = clearRoot(glob(PATH_TO_DISPLAY.'*/'), $ingore_path);
+foreach ($root as &$path) {
     $structure = array();
     $structure['name'] = $path;
     $structure['url']  = PATH_TO_DISPLAY.$path;
@@ -515,24 +509,21 @@ foreach ($root AS &$path)
 
 // main code vhost
 $vhost_include_not_define = true;
-if (($apache_conf = glob(WAMP_PATH.'bin/apache/apache*/conf/httpd.conf')) > 0)
-{
+if (($apache_conf = glob(WAMP_PATH.'bin/apache/apache*/conf/httpd.conf')) > 0) {
     $apache_conf = realpath($apache_conf[0]);
-    if (($vhostIsEnable = vhostIsEnable($apache_conf)))
-    {
+    if (($vhostIsEnable = vhostIsEnable($apache_conf))) {
         $vhosts = glob(WAMP_PATH.'vhost/*.conf');
 
-        foreach ($vhosts AS &$vhost)
-        {
+        foreach ($vhosts as &$vhost) {
             $structure = array();
 
             $vhost_path = explode('\\', realpath($vhost));
             $structure['name'] = substr($vhost_path[count($vhost_path) - 1], 0, -5);
 
-            $structure['vhost']= $vhost;
-            $structure['path'] = getVhostPath($vhost);
-            $structure['url']  = getVhostUrl($vhost);
-            $structure['img']  = getVhostPreview($structure);
+            $structure['vhost'] = $vhost;
+            $structure['path']  = getVhostPath($vhost);
+            $structure['url']   = getVhostUrl($vhost);
+            $structure['img']   = getVhostPreview($structure);
             $vhost = $structure;
         }
     }
@@ -541,8 +532,7 @@ if (($apache_conf = glob(WAMP_PATH.'bin/apache/apache*/conf/httpd.conf')) > 0)
 
 // main code alias
 $alias = clearAlias(glob(WAMP_PATH.'alias/*.conf'));
-foreach ($alias AS $name=>&$path)
-{
+foreach ($alias as $name => &$path) {
     $structure = array();
     $structure['name'] = $name;
     $structure['url']  = getAliasUrl($path);
@@ -553,8 +543,7 @@ sort($alias);
 
 
 // main code toolbox
-foreach ($toolbox AS $name=>&$url)
-{
+foreach ($toolbox as $name => &$url) {
     $structure = array();
     $structure['name'] = $name;
     $structure['url']  = $url;
@@ -590,8 +579,13 @@ $mysql_version = $match[0];
                         <!-- www -->
                         <span class="label label-info" style="margin-top:11px;margin-bottom:10px">www</span>
                         <div class="row-fluid">
-                            <?php foreach ($root AS $nb=>&$dir): ?>
-                            <?php if ($nb % 4 == 0) echo ($nb != 0 ? '</ul>' : '').'<ul class="thumbnails">'; ?> 
+                            <?php foreach ($root as $nb => &$dir): ?>
+                                <?php if ($nb % 4 == 0): ?>
+                                    <?php if ($nb != 0): ?>
+                                        </ul>
+                                    <?php endif; ?>
+                                    <ul class="thumbnails">
+                                <?php endif; ?>
                                 <li class="span3">
                                     <a href="<?php echo $dir['url']; ?>" class="thumbnail" style="background:white">
                                         <img src="<?php echo $dir['img']; ?>">
@@ -606,11 +600,14 @@ $mysql_version = $match[0];
                         <!-- vhost -->
                         <span class="label label-inverse" style="margin-top:11px;margin-bottom:10px">vhost</span>
                         <div class="row-fluid">
-                            <?php 
-                            if ($vhostIsEnable)
-                            {
-                                foreach ($vhosts AS $nb=>&$vhost): ?>
-                                <?php if ($nb % 4 == 0) echo ($nb != 0 ? '</ul>' : '').'<ul class="thumbnails">'; ?> 
+                            <?php if ($vhostIsEnable): ?>
+                                <?php foreach ($vhosts as $nb => &$vhost): ?>
+                                    <?php if ($nb % 4 == 0): ?>
+                                        <?php if ($nb != 0): ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                        <ul class="thumbnails">
+                                    <?php endif; ?>
                                     <li class="span3">
                                         <a href="<?php echo $vhost['url']; ?>" class="thumbnail" style="background:white">
                                             <img src="<?php echo $vhost['img']; ?>">
@@ -620,15 +617,15 @@ $mysql_version = $match[0];
                                     </li>
                                 <?php endforeach; ?>
                                 </ul>
-                                <?php
-                            }
+                            <?php endif; ?>
 
+                            <?php
                             // Example
                             $vhost_default_conf = "&lt;VirtualHost *:80>\n\tServerName <strong class='project'>PROJECT</strong>.localhost.com\n\tServerAlias <strong class='project'>PROJECT</strong>.localhost\n\n\tDocumentRoot ".strtolower(WAMP_PATH)."www_<strong class='project'>PROJECT</strong>\n\t&lt;directory ".strtolower(WAMP_PATH)."www_<strong class='project'>PROJECT</strong>>\n\t\tallow from all\n\t&lt;/directory>\n\n\tErrorLog ".strtolower(WAMP_PATH)."logs\<strong class='project'>PROJECT</strong>_apache_error.log\n&lt;/VirtualHost>";
                             ?>
                             <span id="vhost-example-button" class="label label-warning" style="cursor:help;float:right">Example vhost</span>
                             <div id="vhost-example" style="<?php if ($vhostIsEnable): ?>display:none<?php endif; ?>">
-                                <pre><?php echo ($vhost_default_conf) ?></pre>
+                                <pre><?php echo($vhost_default_conf) ?></pre>
                                 <?php if ($vhost_include_not_define): ?>
                                     <small>Add <code>Include "<?php echo WAMP_PATH; ?>vhost\*.conf"</code> in <code><?php echo sprintf('%s<strong>%s</strong>', substr($apache_conf, 0, -10), substr($apache_conf, -10)); ?></code></small><br/>
                                 <?php endif; ?>
@@ -647,8 +644,8 @@ $mysql_version = $match[0];
                             </div>
                             <div class="span10" style="margin-left:-20px">
                                 <span class="label label-inverse">PHP extensions</span>
-                                <?php foreach (get_loaded_extensions() AS $extension): ?>
-                                    <span class="label"><?php echo $extension; ?></span> 
+                                <?php foreach (get_loaded_extensions() as $extension): ?>
+                                    <span class="label"><?php echo $extension; ?></span>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -659,19 +656,21 @@ $mysql_version = $match[0];
                         <!-- alias -->
                         <span class="label label-inverse" style="margin-top:11px;margin-bottom:10px">alias</span>
                         <div class="row-fluid" style="padding-left:5px">
-                            <?php
-                            foreach ($alias AS $item)
-                                echo sprintf('<a href="%s"><i class="icon-test" style="background:url(%s);background-size:16px 16px"></i> %s</a><br/>', $item['url'], $item['img'], $item['name']);
-                            ?>
+                            <?php foreach ($alias as $item): ?>
+                                <a href="<?php echo $item['url']; ?>">
+                                    <i class="icon-test" style="background:url(<?php echo $item['img']; ?>);background-size:16px 16px"></i> <?php echo $item['name']; ?>
+                                </a><br/>
+                            <?php endforeach; ?>
                         </div>
 
                         <!-- toolbox -->
                         <span class="label label-info" style="margin-top:11px;margin-bottom:10px">toolbox</span>
                         <div class="row-fluid" style="padding-left:5px">
-                            <?php
-                            foreach ($toolbox AS $item)
-                                echo sprintf('<a href="%s" target="_blank"><i class="icon-test" style="background:url(%s);background-size:16px 16px"></i> %s</a><br/>', $item['url'], $item['img'], $item['name']);
-                            ?>
+                            <?php foreach ($toolbox as $item): ?>
+                                <a href="<?php echo $item['url']; ?>" target="_blank">
+                                    <i class="icon-test" style="background:url(<?php echo $item['img']; ?>);background-size:16px 16px"></i> <?php echo $item['name']; ?>
+                                </a><br/>
+                            <?php endforeach; ?>
                         </div>
 
                     </div>
