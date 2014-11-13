@@ -654,14 +654,16 @@ $mysql_version = $match[0];
                     <div class="span2">
 
                         <!-- alias -->
-                        <span class="label label-inverse" style="margin-top:11px;margin-bottom:10px">alias</span>
-                        <div class="row-fluid" style="padding-left:5px">
-                            <?php foreach ($alias as $item): ?>
-                                <a href="<?php echo $item['url']; ?>">
-                                    <i class="icon-test" style="background:url(<?php echo $item['img']; ?>);background-size:16px 16px"></i> <?php echo $item['name']; ?>
-                                </a><br/>
-                            <?php endforeach; ?>
-                        </div>
+                        <?php if (!empty($alias)): ?>
+                            <span class="label label-inverse" style="margin-top:11px;margin-bottom:10px">alias</span>
+                            <div class="row-fluid" style="padding-left:5px">
+                                <?php foreach ($alias as $item): ?>
+                                    <a href="<?php echo $item['url']; ?>">
+                                        <i class="icon-test" style="background:url(<?php echo $item['img']; ?>);background-size:16px 16px"></i> <?php echo $item['name']; ?>
+                                    </a><br/>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
 
                         <!-- toolbox -->
                         <span class="label label-info" style="margin-top:11px;margin-bottom:10px">toolbox</span>
