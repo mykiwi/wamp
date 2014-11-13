@@ -567,6 +567,7 @@ $mysql_version = $match[0];
         <title>localhost</title>
         <link href=".bootstrap/css/bootstrap.min.css" rel="stylesheet">
         <link href=".bootstrap/css/application.css" rel="stylesheet">
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     </head>
     <body>
         <div id="page">
