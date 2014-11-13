@@ -640,7 +640,7 @@ $mysql_version = $match[0];
                             <div class="span2">
                                 <span class="label">Apache</span> <span class="label label-warning"><?php echo $apache_version; ?></span><br/>
                                 <span class="label">PHP</span>    <span class="label label-warning"><?php echo $php_version;    ?></span><br/>
-                                <span class="label">MySQL</span>  <span class="label label-warning"><?php echo $mysql_version;  ?></span>
+                                <span class="label">MySQL</span>  <span class="label label-warning"><?php echo $mysql_version ?: 'unknown';  ?></span>
                             </div>
                             <div class="span10" style="margin-left:-20px">
                                 <span class="label label-inverse">PHP extensions</span>
