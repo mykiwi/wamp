@@ -42,7 +42,6 @@ $ingore_path = array(
 
 $toolbox = array(
     'Regex tester'           => 'http://regex101.com/',
-    'Regex memo'             => 'http://www.siteduzero.com/tutoriel-3-14616-les-classes-abregees.html#ss_part',
     'SublimeT... Packages'   => 'http://wbond.net/sublime_packages/community',
     'Composer Packages'      => 'https://packagist.org/',
     'Symfony'                => 'http://symfony.com/search?type=',
