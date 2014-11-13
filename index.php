@@ -34,6 +34,7 @@
 
 $path_to_display = './';
 $wamp_path       = 'C:/wamp';
+$projectsListIgnore = array ('.', '..');
 
 
 $toolbox = array(
@@ -79,14 +80,18 @@ define('WAMP_PATH',         realpath($wamp_path).'\\');
 /**
  * Clean array 
  * @param array $array
+ * @param array $lirst
  * @return array
  */
-function clearRoot($array)
+function clearRoot($array, $list)
 {
-    foreach ($array AS &$item)
+    foreach ($array AS $k => &$item){
         $item = substr($item, strlen(PATH_TO_DISPLAY), -1);
+        if(in_array($item, $list)){
+            unset($array[$k]);
+        }
+    }
     sort($array, SORT_FLAG_CASE | SORT_STRING);
-
     return $array;
 }
 
@@ -497,7 +502,7 @@ if (isset($_GET['phpinfo'])) {
 
 
 // main code www
-$root = clearRoot(glob(PATH_TO_DISPLAY.'*/'));
+$root = clearRoot(glob(PATH_TO_DISPLAY.'*/'), $projectsListIgnore);
 foreach ($root AS &$path)
 {
     $structure = array();
