@@ -598,26 +598,25 @@ $mysql_version = $match[0];
                         </div>
 
                         <!-- vhost -->
+                        <?php if ($vhostIsEnable): ?>
                         <span class="label label-inverse" style="margin-top:11px;margin-bottom:10px">vhost</span>
                         <div class="row-fluid">
-                            <?php if ($vhostIsEnable): ?>
-                                <?php foreach ($vhosts as $nb => &$vhost): ?>
-                                    <?php if ($nb % 4 == 0): ?>
-                                        <?php if ($nb != 0): ?>
-                                            </ul>
-                                        <?php endif; ?>
-                                        <ul class="thumbnails">
+                            <?php foreach ($vhosts as $nb => &$vhost): ?>
+                                <?php if ($nb % 4 == 0): ?>
+                                    <?php if ($nb != 0): ?>
+                                        </ul>
                                     <?php endif; ?>
-                                    <li class="span3">
-                                        <a href="<?php echo $vhost['url']; ?>" class="thumbnail" style="background:white">
-                                            <img src="<?php echo $vhost['img']; ?>">
-                                        </a>
-                                        <div class="name"><?php echo substr($vhost['name'], 0, 20).(strlen($vhost['name']) > 20 ? '...' : ''); ?></div>
-                                        <div class="space" data-path="<?php echo $vhost['path']; ?>"></div>
-                                    </li>
-                                <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
+                                    <ul class="thumbnails">
+                                <?php endif; ?>
+                                <li class="span3">
+                                    <a href="<?php echo $vhost['url']; ?>" class="thumbnail" style="background:white">
+                                        <img src="<?php echo $vhost['img']; ?>">
+                                    </a>
+                                    <div class="name"><?php echo substr($vhost['name'], 0, 20).(strlen($vhost['name']) > 20 ? '...' : ''); ?></div>
+                                    <div class="space" data-path="<?php echo $vhost['path']; ?>"></div>
+                                </li>
+                            <?php endforeach; ?>
+                            </ul>
 
                             <?php
                             // Example
@@ -633,6 +632,7 @@ $mysql_version = $match[0];
                                 <small>Don't forget to add your domains in <code>C:\Windows\System32\drivers\etc\hosts</code> like <code>127.0.0.1 <strong class='project'>PROJECT</strong>.localhost.com <strong class='project'>PROJECT</strong>.localhost</code>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <!-- infos -->
                         <span class="label label-info" style="margin-top:11px;margin-bottom:10px">server</span>
