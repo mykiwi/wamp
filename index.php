@@ -376,7 +376,7 @@ function getVhostUrl($vhost)
     $handle = fopen($vhost, 'r');
     if ($handle) {
         while (($buffer = fgets($handle)) !== false) {
-            if (preg_match('#ServerName (.*)#i', $buffer, $match)) {
+            if (preg_match('#ServerName\s+(.*)#i', $buffer, $match)) {
                 fclose($handle);
 
                 return 'http://'.$match[1].'/';
