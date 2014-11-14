@@ -19,6 +19,11 @@ You can configure and customize the script with this variables:
 $path_to_display = './';
 $wamp_path       = 'C:/wamp';
 
+$ingore_path = array(
+    '.',
+    '..',
+);
+
 $toolbox = array(
     'Name' => 'http://url.to.go',
 );
