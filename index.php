@@ -35,7 +35,7 @@
 $path_to_display = './';
 $wamp_path       = 'C:/wamp';
 
-$ingore_path = array(
+$dirs_to_ignore  = array(
     '.',
     '..',
 );
@@ -495,8 +495,7 @@ if (isset($_GET['phpinfo'])) {
 
 
 
-// main code www
-$root = clearRoot(glob(PATH_TO_DISPLAY.'*/'), $ingore_path);
+$root  = clearRoot(glob(PATH_TO_DISPLAY.'*/'), $dirs_to_ignore);
 foreach ($root as &$path) {
     $structure = array();
     $structure['name'] = $path;
