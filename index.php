@@ -229,7 +229,7 @@ function getPreview($path)
  */
 function getVhostPreview($vhost)
 {
-    if ($thumbnails = glob(substr($vhost['path_config'], 0, -5).'.*g')) { // png or jpg
+    if ($thumbnails = glob($vhost['path_config'].'/'.$vhost['name'].'.*g')) { // png or jpg
         foreach ($thumbnails as $thumbnail) {
             if (false !== getimagesize($thumbnail)) {
                 return '?get_external_img='.realpath($thumbnail);
@@ -240,7 +240,8 @@ function getVhostPreview($vhost)
     foreach ($GLOBALS['preview_inside_dir'] as $preview) {
         if ($thumbnails = glob($vhost['path'].'/'.$preview.'*')) {
             if (false !== getimagesize($thumbnails[0])) {
-                return $vhost['url'].'/'.$thumbnails[0];
+
+                return $vhost['url'].'/'.substr($thumbnails[0], strlen($vhost['path']));
             }
         }
     }
@@ -441,7 +442,7 @@ function put_in_cache($content)
  */
 function getVhostPath($vhost)
 {
-    if (preg_match('#DocumentRoot "?(.*)"?#i', $vhost, $match)) {
+    if (preg_match('#DocumentRoot "?([^"]*)"#i', $vhost, $match)) {
 
         return $match[1];
     }
