@@ -46,6 +46,7 @@ $vhost_to_ignore = array(
 //$custom_vhost_path_config = '/etc/apache2/vhosts';
 
 $toolbox = array(
+    'phpinfo()'              => '?phpinfo',
     'Regex tester'           => 'http://regex101.com/',
     'SublimeT... Packages'   => 'http://wbond.net/sublime_packages/community',
     'Composer Packages'      => 'https://packagist.org/',
