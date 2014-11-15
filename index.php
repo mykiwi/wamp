@@ -551,9 +551,8 @@ NameVirtualHost *:80
     ServerName  PROJECT.localhost
     ServerAlias PROJECT.localhost.com
 
-    DocumentRoot "/path/of/your/project"
-
-    <Directory "/path/of/your/project">
+    DocumentRoot "%s/PATH"
+    <Directory   "%s/PATH">
         Options Indexes FollowSymLinks ExecCGI Includes
         AllowOverride All
         Require all granted
@@ -567,21 +566,25 @@ VHOST;
     ServerName  PROJECT.localhost
     ServerAlias PROJECT.localhost.com
 
-    DocumentRoot "%s/www_PROJECT"
-
-    <directory "%s/www_PROJECT">
+    DocumentRoot "%s/PATH"
+    <directory   "%s/PATH">
         allow from all
     </directory>
 </VirtualHost>
 VHOST;
-            $vhost_default_conf = sprintf($vhost_default_conf, strtolower(WAMP_PATH));
             $vhost_path_config = WAMP_PATH.'vhost\<strong class="project">PROJECT</strong>.conf';
         }
+        $vhost_default_conf = sprintf($vhost_default_conf, realpath($path_to_display), realpath($path_to_display));
         $vhost_default_conf = htmlentities($vhost_default_conf);
         $vhost_default_conf = preg_replace('#PROJECT#', '<strong class="project">PROJECT</strong>', $vhost_default_conf);
+        $vhost_default_conf = preg_replace('#PATH#', '<strong class="path">PATH</strong>', $vhost_default_conf);
     }
 }
 
+$hosts_path = '/etc/hosts';
+if (false !== strpos(strtolower(PHP_OS), 'cygwin')) {
+    $hosts_path = 'C:\Windows\System32\drivers\etc\hosts';
+}
 
 // main code alias
 $alias = clearAlias(glob(WAMP_PATH.'alias/*.conf'));
@@ -682,8 +685,8 @@ $mysql_version = isset($match[0])
                                         <small>Add <code>Include "<?php echo WAMP_PATH; ?>vhost\*.conf"</code> in <code><?php echo sprintf('%s<strong>%s</strong>', substr($apache_conf, 0, -10), substr($apache_conf, -10)); ?></code></small><br/>
                                     <?php endif; ?>
                                 <?php endif; ?>
-                                <small>You must write this conf inside <code><?php echo isset($custom_vhost_path_config) ? $custom_vhost_path_config : $vhost_path_config; ?></code> and create a directory <code><?php echo WAMP_PATH ?>www_<strong class='project'>PROJECT</strong></code></small><br/>
-                                <small>Don't forget to add your domains in <code>C:\Windows\System32\drivers\etc\hosts</code> like <code>127.0.0.1 <strong class='project'>PROJECT</strong>.localhost.com <strong class='project'>PROJECT</strong>.localhost</code>
+                                <small>You must write this conf inside <code><?php echo isset($custom_vhost_path_config) ? $custom_vhost_path_config : $vhost_path_config; ?></code> and create a directory <code><?php echo realpath($path_to_display); ?>/<strong class='path'>PATH</strong></code></small><br/>
+                                <small>Don't forget to add your domains in <code><?php echo $hosts_path; ?></code> like <code>127.0.0.1 <strong class='project'>PROJECT</strong>.localhost.com <strong class='project'>PROJECT</strong>.localhost</code>
                             </div>
                         </div>
                         <?php endif; ?>
