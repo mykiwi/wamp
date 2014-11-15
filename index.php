@@ -39,6 +39,11 @@ $dirs_to_ignore  = array(
     '.',
     '..',
 );
+$vhost_to_ignore = array(
+    'localhost',
+);
+
+//$custom_vhost_path_config = '/etc/apache2/vhosts';
 
 $toolbox = array(
     'Regex tester'           => 'http://regex101.com/',
@@ -223,7 +228,7 @@ function getPreview($path)
  */
 function getVhostPreview($vhost)
 {
-    if ($thumbnails = glob(substr($vhost['vhost'], 0, -5).'.*g')) { // png or jpg
+    if ($thumbnails = glob(substr($vhost['path_config'], 0, -5).'.*g')) { // png or jpg
         foreach ($thumbnails as $thumbnail) {
             if (false !== getimagesize($thumbnail)) {
                 return '?get_external_img='.realpath($thumbnail);
@@ -369,21 +374,14 @@ function vhostIsEnable($httpd_conf)
 
 /**
  * Parse vhost conf and return the url
- * @param  string $vhost path
+ * @param  string $vhost config
  * @return string        url
  */
 function getVhostUrl($vhost)
 {
-    $handle = fopen($vhost, 'r');
-    if ($handle) {
-        while (($buffer = fgets($handle)) !== false) {
-            if (preg_match('#ServerName\s+(.*)#i', $buffer, $match)) {
-                fclose($handle);
+    if (preg_match('#ServerName\s+(.*)#i', $vhost, $match)) {
 
-                return 'http://'.$match[1].'/';
-            }
-        }
-        fclose($handle);
+        return 'http://'.$match[1].'/';
     }
 
     return null;
@@ -437,24 +435,46 @@ function put_in_cache($content)
 
 /**
  * Get document root of a virtual host
- * @param  string $vhost path
+ * @param  string $vhost config
  * @return string        root
  */
 function getVhostPath($vhost)
 {
-    $handle = fopen($vhost, 'r');
-    if ($handle) {
-        while (($buffer = fgets($handle)) !== false) {
-            if (preg_match('#DocumentRoot (.*)#i', $buffer, $match)) {
-                fclose($handle);
+    if (preg_match('#DocumentRoot "?(.*)"?#i', $vhost, $match)) {
 
-                return $match[1];
-            }
-        }
-        fclose($handle);
+        return $match[1];
     }
 
     return null;
+}
+
+
+function getVhosts($vhost_config_path)
+{
+    $vhost_config_path = realpath($vhost_config_path);
+    $content = file_get_contents($vhost_config_path);
+
+    preg_match_all('#<VirtualHost[^>]+>(.+)<\/VirtualHost>#sU', $content, $matches);
+
+    $structure = array();
+    foreach ($matches[1] as $vhost) {
+
+        $v = array(
+            'url'         => getVhostUrl($vhost),
+            'path'        => getVhostPath($vhost),
+            'path_config' => $vhost_config_path,
+        );
+        $v['name'] = substr($v['url'], 7, -1);
+        $v['img']  = getVhostPreview($v);
+
+        if (isset($GLOBALS['vhost_to_ignore']) && in_array($v['name'], $GLOBALS['vhost_to_ignore'])) {
+            continue;
+        }
+
+        $structure[] = $v;
+    }
+
+    return $structure;
 }
 
 
@@ -508,23 +528,55 @@ foreach ($root as &$path) {
 
 // main code vhost
 $vhost_include_not_define = true;
-if (($apache_conf = glob(WAMP_PATH.'bin/apache/apache*/conf/httpd.conf')) > 0) {
-    $apache_conf = realpath($apache_conf[0]);
-    if (($vhostIsEnable = vhostIsEnable($apache_conf))) {
-        $vhosts = glob(WAMP_PATH.'vhost/*.conf');
+if (($apache_conf = glob(WAMP_PATH.'bin/apache/apache*/conf/httpd.conf')) > 0 || $custom_vhost_path_config) {
+    $apache_conf = realpath(isset($apache_conf[0]) ? $apache_conf[0] : null);
+    if (($vhostIsEnable = (vhostIsEnable($apache_conf) || isset($custom_vhost_path_config)))) {
+        $vhosts_path = isset($custom_vhost_path_config)
+            ? array($custom_vhost_path_config)
+            : glob(WAMP_PATH.'vhost/*.conf');
 
-        foreach ($vhosts as &$vhost) {
-            $structure = array();
+        $vhosts = array();
 
-            $vhost_path = explode('\\', realpath($vhost));
-            $structure['name'] = substr($vhost_path[count($vhost_path) - 1], 0, -5);
-
-            $structure['vhost'] = $vhost;
-            $structure['path']  = getVhostPath($vhost);
-            $structure['url']   = getVhostUrl($vhost);
-            $structure['img']   = getVhostPreview($structure);
-            $vhost = $structure;
+        foreach ($vhosts_path as &$vhost) {
+            $vhosts = array_merge($vhosts, getVhosts($vhost, $vhost_to_ignore));
         }
+
+// use apache_get_version
+        if ('Darwin' === PHP_OS) {
+            $vhost_default_conf = <<<VHOST
+NameVirtualHost *:80
+<VirtualHost *:80>
+    ServerName  PROJECT.localhost
+    ServerAlias PROJECT.localhost.com
+
+    DocumentRoot "/path/of/your/project"
+
+    <Directory "/path/of/your/project">
+        Options Indexes FollowSymLinks ExecCGI Includes
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+VHOST;
+            $vhost_path_config = '/etc/apache2/extra/httpd-vhosts.conf';
+        } else {
+            $vhost_default_conf = <<<VHOST
+<VirtualHost *:80>
+    ServerName  PROJECT.localhost
+    ServerAlias PROJECT.localhost.com
+
+    DocumentRoot "%s/www_PROJECT"
+
+    <directory "%s/www_PROJECT">
+        allow from all
+    </directory>
+</VirtualHost>
+VHOST;
+            $vhost_default_conf = sprintf($vhost_default_conf, strtolower(WAMP_PATH));
+            $vhost_path_config = WAMP_PATH.'vhost\<strong class="project">PROJECT</strong>.conf';
+        }
+        $vhost_default_conf = htmlentities($vhost_default_conf);
+        $vhost_default_conf = preg_replace('#PROJECT#', '<strong class="project">PROJECT</strong>', $vhost_default_conf);
     }
 }
 
@@ -557,8 +609,10 @@ $apache_version = $match[0];
 
 $php_version = phpversion();
 
-preg_match("([0-9\.]+)", mysql_get_server_info(), $match);
-$mysql_version = $match[0];
+preg_match("([0-9\.]+)", @mysql_get_server_info(), $match);
+$mysql_version = isset($match[0])
+    ? $match[0]
+    : null;
 
 ?>
 <!DOCTYPE html>
@@ -618,17 +672,15 @@ $mysql_version = $match[0];
                             <?php endforeach; ?>
                             </ul>
 
-                            <?php
-                            // Example
-                            $vhost_default_conf = "&lt;VirtualHost *:80>\n\tServerName <strong class='project'>PROJECT</strong>.localhost.com\n\tServerAlias <strong class='project'>PROJECT</strong>.localhost\n\n\tDocumentRoot ".strtolower(WAMP_PATH)."www_<strong class='project'>PROJECT</strong>\n\t&lt;directory ".strtolower(WAMP_PATH)."www_<strong class='project'>PROJECT</strong>>\n\t\tallow from all\n\t&lt;/directory>\n\n\tErrorLog ".strtolower(WAMP_PATH)."logs\<strong class='project'>PROJECT</strong>_apache_error.log\n&lt;/VirtualHost>";
-                            ?>
                             <span id="vhost-example-button" class="label label-warning" style="cursor:help;float:right">Example vhost</span>
                             <div id="vhost-example" style="<?php if ($vhostIsEnable): ?>display:none<?php endif; ?>">
                                 <pre><?php echo($vhost_default_conf) ?></pre>
-                                <?php if ($vhost_include_not_define): ?>
-                                    <small>Add <code>Include "<?php echo WAMP_PATH; ?>vhost\*.conf"</code> in <code><?php echo sprintf('%s<strong>%s</strong>', substr($apache_conf, 0, -10), substr($apache_conf, -10)); ?></code></small><br/>
+                                <?php if ('Darwin' != PHP_OS): ?>
+                                    <?php if ($vhost_include_not_define): ?>
+                                        <small>Add <code>Include "<?php echo WAMP_PATH; ?>vhost\*.conf"</code> in <code><?php echo sprintf('%s<strong>%s</strong>', substr($apache_conf, 0, -10), substr($apache_conf, -10)); ?></code></small><br/>
+                                    <?php endif; ?>
                                 <?php endif; ?>
-                                <small>You must write this conf inside <code><?php echo WAMP_PATH ?>vhost\<strong class="project">PROJECT</strong>.conf</code> and create a directory <code><?php echo WAMP_PATH ?>www_<strong class='project'>PROJECT</strong></code></small><br/>
+                                <small>You must write this conf inside <code><?php echo isset($custom_vhost_path_config) ? $custom_vhost_path_config : $vhost_path_config; ?></code> and create a directory <code><?php echo WAMP_PATH ?>www_<strong class='project'>PROJECT</strong></code></small><br/>
                                 <small>Don't forget to add your domains in <code>C:\Windows\System32\drivers\etc\hosts</code> like <code>127.0.0.1 <strong class='project'>PROJECT</strong>.localhost.com <strong class='project'>PROJECT</strong>.localhost</code>
                             </div>
                         </div>
