@@ -44,6 +44,7 @@ $toolbox = array(
     'Regex tester'           => 'http://regex101.com/',
     'SublimeT... Packages'   => 'http://wbond.net/sublime_packages/community',
     'Composer Packages'      => 'https://packagist.org/',
+    'Bower Pacakges'         => 'http://bower.io/search/',
     'Symfony'                => 'http://symfony.com/search?type=',
     'Stack Overflow'         => 'http://stackoverflow.com/',
     'Deviant Art Interfaces' => 'http://browse.deviantart.com/designs/?order=9',
