@@ -630,7 +630,6 @@ $mysql_version = isset($match[0])
     </head>
     <body>
         <div id="page">
-            <a id="altf4" title="an ALT F4 product" href="http://altf4.me"></a>
             <div class="container">
                 <div class="row">
                     <div class="span12">

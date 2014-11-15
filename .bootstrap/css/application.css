@@ -12,21 +12,6 @@ body {
     min-height: 899px;
 }
 
-#altf4 {
-    position: absolute;
-    top:11px;
-    left:14px;
-    background: url(../img/an_altf4_product.png) no-repeat 0px -18px;
-    width:115px;
-    height: 18px;
-}
-
-#altf4:hover {
-    background: url(../img/an_altf4_product.png) no-repeat 0px 0px;
-    width:115px;
-    height: 18px;
-}
-
 li div.name {
     left:5px;
     float:left;
