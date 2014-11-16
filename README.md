@@ -19,10 +19,16 @@ You can configure and customize the script with this variables:
 $path_to_display = './';
 $wamp_path       = 'C:/wamp';
 
-$ingore_path = array(
+$dirs_to_ignore  = array(
     '.',
     '..',
 );
+
+$vhost_to_ignore = array(
+    'localhost',
+);
+
+//$custom_vhost_path_config = '/etc/apache2/vhosts';
 
 $toolbox = array(
     'Name' => 'http://url.to.go',
