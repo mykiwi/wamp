@@ -305,17 +305,17 @@ function format_bytes($a_bytes)
     } elseif ($a_bytes < 1073741824) {
         return round($a_bytes / 1048576).' Mo';
     } elseif ($a_bytes < 1099511627776) {
-        return round($a_bytes / 1073741824).' Go';
+        return round($a_bytes / 1073741824, 3).' Go';
     } elseif ($a_bytes < 1125899906842624) {
-        return round($a_bytes / 1099511627776).' To';
+        return round($a_bytes / 1099511627776, 3).' To';
     } elseif ($a_bytes < 1152921504606846976) {
-        return round($a_bytes / 1125899906842624).' Po';
+        return round($a_bytes / 1125899906842624, 3).' Po';
     } elseif ($a_bytes < 1180591620717411303424) {
-        return round($a_bytes / 1152921504606846976).' Eo';
+        return round($a_bytes / 1152921504606846976, 3).' Eo';
     } elseif ($a_bytes < 1208925819614629174706176) {
-        return round($a_bytes / 1180591620717411303424).' Zo';
+        return round($a_bytes / 1180591620717411303424, 3).' Zo';
     } else {
-        return round($a_bytes / 1208925819614629174706176).' Yo';
+        return round($a_bytes / 1208925819614629174706176, 3).' Yo';
     }
 }
 
