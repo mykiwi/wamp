@@ -84,6 +84,7 @@ $cache['toolbox']['icon']['img'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9T
 
 define('PATH_TO_DISPLAY',   $path_to_display);
 define('WAMP_PATH',         realpath($wamp_path).'\\');
+define('IS_WINDOWS',        preg_match('#^(winnt|cygwin)$#i', PHP_OS));
 
 
 /**
@@ -546,15 +547,15 @@ if (($apache_conf = glob(WAMP_PATH.'bin/apache/apache*/conf/httpd.conf')) > 0 ||
         }
 
 // use apache_get_version
-        if ('Darwin' === PHP_OS) {
+        if (!IS_WINDOWS) {
             $vhost_default_conf = <<<VHOST
 NameVirtualHost *:80
 <VirtualHost *:80>
     ServerName  PROJECT.localhost
     ServerAlias PROJECT.localhost.com
 
-    DocumentRoot "%s/PATH"
-    <Directory   "%s/PATH">
+    DocumentRoot "%sPATH"
+    <Directory   "%sPATH">
         Options Indexes FollowSymLinks ExecCGI Includes
         AllowOverride All
         Require all granted
@@ -562,21 +563,23 @@ NameVirtualHost *:80
 </VirtualHost>
 VHOST;
             $vhost_path_config = '/etc/apache2/extra/httpd-vhosts.conf';
+            $slash = '/';
         } else {
             $vhost_default_conf = <<<VHOST
 <VirtualHost *:80>
     ServerName  PROJECT.localhost
     ServerAlias PROJECT.localhost.com
 
-    DocumentRoot "%s/PATH"
-    <directory   "%s/PATH">
+    DocumentRoot "%sPATH"
+    <directory   "%sPATH">
         allow from all
     </directory>
 </VirtualHost>
 VHOST;
             $vhost_path_config = WAMP_PATH.'vhost\<strong class="project">PROJECT</strong>.conf';
+            $slash = '\\';
         }
-        $vhost_default_conf = sprintf($vhost_default_conf, realpath($path_to_display), realpath($path_to_display));
+        $vhost_default_conf = sprintf($vhost_default_conf, realpath($path_to_display).$slash, realpath($path_to_display).$slash);
         $vhost_default_conf = htmlentities($vhost_default_conf);
         $vhost_default_conf = preg_replace('#PROJECT#', '<strong class="project">PROJECT</strong>', $vhost_default_conf);
         $vhost_default_conf = preg_replace('#PATH#', '<strong class="path">PATH</strong>', $vhost_default_conf);
@@ -584,7 +587,7 @@ VHOST;
 }
 
 $hosts_path = '/etc/hosts';
-if (false !== strpos(strtolower(PHP_OS), 'cygwin')) {
+if (IS_WINDOWS) {
     $hosts_path = 'C:\Windows\System32\drivers\etc\hosts';
 }
 
@@ -681,12 +684,10 @@ $mysql_version = isset($match[0])
                             <span id="vhost-example-button" class="label label-warning" style="cursor:help;float:right">Example vhost</span>
                             <div id="vhost-example" style="<?php if ($vhostIsEnable): ?>display:none<?php endif; ?>">
                                 <pre><?php echo($vhost_default_conf) ?></pre>
-                                <?php if ('Darwin' != PHP_OS): ?>
-                                    <?php if ($vhost_include_not_define): ?>
-                                        <small>Add <code>Include "<?php echo WAMP_PATH; ?>vhost\*.conf"</code> in <code><?php echo sprintf('%s<strong>%s</strong>', substr($apache_conf, 0, -10), substr($apache_conf, -10)); ?></code></small><br/>
-                                    <?php endif; ?>
+                                <?php if (IS_WINDOWS && $vhost_include_not_define): ?>
+                                    <small>Add <code>Include "<?php echo WAMP_PATH; ?>vhost\*.conf"</code> in <code><?php echo sprintf('%s<strong>%s</strong>', substr($apache_conf, 0, -10), substr($apache_conf, -10)); ?></code></small><br/>
                                 <?php endif; ?>
-                                <small>You must write this conf inside <code><?php echo isset($custom_vhost_path_config) ? $custom_vhost_path_config : $vhost_path_config; ?></code> and create a directory <code><?php echo realpath($path_to_display); ?>/<strong class='path'>PATH</strong></code></small><br/>
+                                <small>You must write this conf inside <code><?php echo isset($custom_vhost_path_config) ? $custom_vhost_path_config : $vhost_path_config; ?></code> and create a directory <code><?php echo realpath($path_to_display).$slash; ?><strong class='path'>PATH</strong></code></small><br/>
                                 <small>Don't forget to add your domains in <code><?php echo $hosts_path; ?></code> like <code>127.0.0.1 <strong class='project'>PROJECT</strong>.localhost.com <strong class='project'>PROJECT</strong>.localhost</code>
                             </div>
                         </div>
