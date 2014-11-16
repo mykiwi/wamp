@@ -355,7 +355,7 @@ function vhostIsEnable($httpd_conf)
 {
     $return = true;
 
-    $handle = fopen($httpd_conf, 'r');
+    $handle = @fopen($httpd_conf, 'r');
     if ($handle) {
         while (($buffer = fgets($handle)) !== false) {
             $buffer = trim($buffer);
