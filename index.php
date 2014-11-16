@@ -260,19 +260,24 @@ function getVhostPreview($vhost)
 
 /**
  * Get size of path
- * @param  string $path directory or file
- * @return int          size in byte
+ * @param  string $path          directory or file
+ * @param  bool   $checkComposer modify path if a composer.json file is found in the parent dir
+ * @return int                   size in byte
  */
-function getDirectorySize($path)
+function getDirectorySize($path, $checkComposer = true)
 {
     $totalsize  = 0;
+
+    if (file_exists($path.'/../composer.json') && $checkComposer) {
+        $path = realpath($path.'/..');
+    }
 
     if ($handle = opendir($path)) {
         while (false !== ($file = readdir($handle))) {
             $nextpath = $path.'/'.$file;
             if ($file != '.' && $file != '..' && !is_link($nextpath)) {
                 if (is_dir($nextpath)) {
-                    $result = getDirectorySize($nextpath);
+                    $result = getDirectorySize($nextpath, false);
                     $totalsize += $result;
                 } elseif (is_file($nextpath)) {
                     $totalsize += filesize($nextpath);
