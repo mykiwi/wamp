@@ -170,7 +170,9 @@ function getFavicon($path)
             return '?get_img='.md5($path.'/favicon.ico').'&type=icon';
         } else {
             $url = explode('/', $path);
-            if ($url[2] != 'localhost') {
+            if (!isset($url[2])) {
+                return '?get_img=toolbox&type=icon';
+            } elseif ($url[2] != 'localhost') {
                 $request = getRequest('http://'.$url[2].'/favicon.ico');
                 if ($request['header']['http_code'] == 200 && substr($request['header']['content_type'], 0, 6) == 'image/') {
                     put_in_cache(array(md5($path.'/favicon.ico') => array('icon' => array('img' => base64_encode($request['body'])))));
