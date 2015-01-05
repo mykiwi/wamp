@@ -477,6 +477,10 @@ function getVhosts($vhost_config_path)
         $v['name'] = substr($v['url'], 7, -1);
         $v['img']  = getVhostPreview($v);
 
+        if (file_exists($v['path'].'/app_dev.php')) {
+            $v['url'] .= 'app_dev.php/';
+        }
+
         if (isset($GLOBALS['vhost_to_ignore']) && in_array($v['name'], $GLOBALS['vhost_to_ignore'])) {
             continue;
         }
