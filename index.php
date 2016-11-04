@@ -628,7 +628,7 @@ $apache_version = $match[0];
 
 $php_version = phpversion();
 
-preg_match("([0-9\.]+)", @mysql_get_server_info(), $match);
+preg_match("([0-9\.]+)", @mysqli_get_server_info(), $match);
 $mysql_version = isset($match[0])
     ? $match[0]
     : null;
